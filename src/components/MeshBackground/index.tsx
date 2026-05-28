@@ -1,72 +1,98 @@
-import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 import { useTheme } from '../../hooks/useTheme'
 
-// 5 blobs do spec iOS 26 com opacities por tema
-interface Blob {
+interface BlobState {
   color: string
   width: number
-  top?: string
-  bottom?: string
-  left?: string
-  right?: string
-  /** opacidade no tema dark */
-  opacityDark: number
-  /** opacidade no tema light (mais saturada, blobs ainda precisam "atravessar" o branco) */
-  opacityLight: number
+  top: number
+  left: number
+  opacity: number
   blur: number
-  duration: number
+  speedX: number
+  speedY: number
+  speedS: number
+  ox: number
+  oy: number
+  os: number
+  tx: number
+  ty: number
+  ts: number
+  el: HTMLDivElement | null
 }
-
-const blobs: Blob[] = [
-  { color: '#0A84FF', width: 600, top: '-10%', left: '-5%', opacityDark: 0.35, opacityLight: 0.45, blur: 120, duration: 10 },
-  { color: '#BF5AF2', width: 500, top: '20%', right: '-10%', opacityDark: 0.30, opacityLight: 0.40, blur: 100, duration: 12 },
-  { color: '#64D2FF', width: 400, bottom: '10%', left: '20%', opacityDark: 0.25, opacityLight: 0.35, blur: 90, duration: 14 },
-  { color: '#FF375F', width: 350, bottom: '-5%', right: '30%', opacityDark: 0.20, opacityLight: 0.30, blur: 80, duration: 9 },
-  { color: '#30D158', width: 300, top: '50%', left: '40%', opacityDark: 0.15, opacityLight: 0.25, blur: 70, duration: 8 },
-]
 
 export function MeshBackground() {
   const { resolvedTheme } = useTheme()
-  const isLight = resolvedTheme === 'light'
+  const containerRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number>(0)
+  const blobsRef = useRef<BlobState[]>([])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const W = window.innerWidth
+    const H = window.innerHeight
+
+    const configs = [
+      { color: '#0A84FF', width: 600, top: -0.1, left: -0.05, opacity: resolvedTheme === 'light' ? 0.45 : 0.55, blur: 120, speedX: 0.0004, speedY: 0.0005, speedS: 0.0003 },
+      { color: '#BF5AF2', width: 500, top: 0.20, left: 0.75,  opacity: resolvedTheme === 'light' ? 0.40 : 0.50, blur: 100, speedX: 0.0003, speedY: 0.0004, speedS: 0.0002 },
+      { color: '#64D2FF', width: 400, top: 0.65, left: 0.20,  opacity: resolvedTheme === 'light' ? 0.35 : 0.45, blur: 90,  speedX: 0.0005, speedY: 0.0003, speedS: 0.0004 },
+      { color: '#FF375F', width: 350, top: 0.80, left: 0.55,  opacity: resolvedTheme === 'light' ? 0.30 : 0.40, blur: 80,  speedX: 0.0004, speedY: 0.0006, speedS: 0.0003 },
+      { color: '#30D158', width: 300, top: 0.50, left: 0.40,  opacity: resolvedTheme === 'light' ? 0.25 : 0.35, blur: 70,  speedX: 0.0006, speedY: 0.0004, speedS: 0.0005 },
+    ]
+
+    container.innerHTML = ''
+    blobsRef.current = configs.map((c, i) => {
+      const el = document.createElement('div')
+      el.style.cssText = `
+        position:absolute;
+        width:${c.width}px;
+        height:${c.width}px;
+        border-radius:50%;
+        background:${c.color};
+        opacity:${c.opacity};
+        filter:blur(${c.blur}px);
+        pointer-events:none;
+        will-change:transform;
+      `
+      container.appendChild(el)
+      const offset = i * 1000
+      return { ...c, ox: offset, oy: offset + 500, os: offset + 250, tx: 0, ty: 0, ts: 0, el }
+    })
+
+    const AMP_X = 40
+    const AMP_Y = 50
+    const AMP_S = 0.06
+
+    function tick(t: number) {
+      blobsRef.current.forEach((b, i) => {
+        if (!b.el) return
+        const x = (W * configs[i].left) + Math.sin((t + b.ox) * b.speedX) * AMP_X
+        const y = (H * configs[i].top)  + Math.sin((t + b.oy) * b.speedY) * AMP_Y
+        const s = 1 + Math.sin((t + b.os) * b.speedS) * AMP_S
+        b.el.style.transform = `translate(${x}px, ${y}px) scale(${s})`
+      })
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [resolvedTheme])
 
   return (
     <div
+      ref={containerRef}
       aria-hidden="true"
       style={{
         position: 'fixed',
-        inset: 0,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
         zIndex: 0,
         overflow: 'hidden',
         pointerEvents: 'none',
       }}
-    >
-      {blobs.map((blob, i) => (
-        <motion.div
-          key={i}
-          style={{
-            position: 'absolute',
-            top: blob.top,
-            bottom: blob.bottom,
-            left: blob.left,
-            right: blob.right,
-            width: blob.width,
-            height: blob.width,
-            borderRadius: '50%',
-            background: blob.color,
-            opacity: isLight ? blob.opacityLight : blob.opacityDark,
-            filter: `blur(${blob.blur}px)`,
-            willChange: 'transform',
-            transition: 'opacity 300ms ease',
-          }}
-          animate={{ y: [-30, 30] }}
-          transition={{
-            duration: blob.duration,
-            repeat: Infinity,
-            repeatType: 'mirror',
-            ease: 'linear',
-          }}
-        />
-      ))}
-    </div>
+    />
   )
 }
