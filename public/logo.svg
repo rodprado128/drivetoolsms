@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="r" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#0A84FF"/>
+      <stop offset="45%" stop-color="#BF5AF2"/>
+      <stop offset="100%" stop-color="#FF375F"/>
+    </linearGradient>
+    <linearGradient id="h" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="g" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="16"/>
+      <feOffset dy="8"/>
+      <feFlood flood-color="#BF5AF2" flood-opacity="0.55"/>
+      <feComposite in2="SourceAlpha" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#g)">
+    <polygon points="256,110 412,388 100,388"
+             fill="none"
+             stroke="url(#r)"
+             stroke-width="86"
+             stroke-linejoin="round"
+             stroke-linecap="round"/>
+    <polygon points="256,165 380,378 132,378"
+             fill="none"
+             stroke="url(#h)"
+             stroke-width="8"
+             stroke-linejoin="round"
+             opacity="0.7"/>
+  </g>
+</svg>

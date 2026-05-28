@@ -1,0 +1,243 @@
+@import "tailwindcss";
+
+/* Variantes Tailwind por tema ativo */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
+/* ============================================================
+   TOKENS FIXOS — iOS system colors e raios
+   ============================================================ */
+@theme {
+  --color-ios-blue: #0A84FF;
+  --color-ios-red: #FF453A;
+  --color-ios-green: #30D158;
+  --color-ios-orange: #FF9F0A;
+  --color-ios-purple: #BF5AF2;
+  --color-ios-pink: #FF375F;
+  --color-ios-teal: #64D2FF;
+  --color-ios-indigo: #5E5CE6;
+
+  --radius-card: 20px;
+  --radius-button: 14px;
+  --radius-input: 12px;
+  --radius-sidebar: 16px;
+  --radius-pill: 9999px;
+
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-default: 350ms;
+  --duration-fast: 200ms;
+  --duration-snap: 120ms;
+}
+
+/* ============================================================
+   VARIÁVEIS ADAPTATIVAS POR TEMA
+   Default = dark. Light override via [data-theme="light"].
+   ============================================================ */
+:root {
+  /* Cores de superfície (texto e separadores) */
+  --color-sys-label: rgba(255, 255, 255, 0.92);
+  --color-sys-label-secondary: rgba(255, 255, 255, 0.55);
+  --color-sys-label-tertiary: rgba(255, 255, 255, 0.30);
+  --color-sys-separator: rgba(255, 255, 255, 0.08);
+
+  /* Body */
+  --color-sys-bg: #080010;
+
+  /* Glass — superfície elevada */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+  --glass-highlight-line: rgba(255, 255, 255, 0.40);
+
+  /* Glass-sm — superfície reduzida (pills, badges) */
+  --glass-sm-bg: rgba(255, 255, 255, 0.08);
+  --glass-sm-border: rgba(255, 255, 255, 0.10);
+  --glass-sm-highlight: rgba(255, 255, 255, 0.14);
+  --glass-sm-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
+}
+
+[data-theme="light"] {
+  --color-sys-label: rgba(0, 0, 0, 0.88);
+  --color-sys-label-secondary: rgba(0, 0, 0, 0.55);
+  --color-sys-label-tertiary: rgba(0, 0, 0, 0.35);
+  --color-sys-separator: rgba(0, 0, 0, 0.10);
+
+  --color-sys-bg: #f0f0f5;
+
+  /* Light glass: mais opacidade mas ainda transparente para o mesh atravessar */
+  --glass-bg: rgba(255, 255, 255, 0.18);
+  --glass-border: rgba(255, 255, 255, 0.40);
+  --glass-highlight: rgba(255, 255, 255, 0.50);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  --glass-highlight-line: rgba(255, 255, 255, 0.60);
+
+  --glass-sm-bg: rgba(255, 255, 255, 0.30);
+  --glass-sm-border: rgba(255, 255, 255, 0.45);
+  --glass-sm-highlight: rgba(255, 255, 255, 0.55);
+  --glass-sm-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+  min-height: 100dvh;
+  background-color: var(--color-sys-bg);
+  color: var(--color-sys-label);
+  letter-spacing: -0.01em;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+#root {
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* ============================================================
+   SUPERFÍCIE GLASS
+   Background sempre transparente para o backdrop-filter
+   capturar o mesh atrás.
+   ============================================================ */
+.glass {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.1);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    var(--glass-shadow);
+  overflow: hidden;
+  transition: background 300ms ease, border-color 300ms ease;
+}
+
+/* Highlight line superior: assinatura do iOS 26 */
+.glass::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--glass-highlight-line) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Variante reduzida */
+.glass-sm {
+  position: relative;
+  background: var(--glass-sm-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-sm-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-sm-highlight),
+    var(--glass-sm-shadow);
+  overflow: hidden;
+  transition: background 300ms ease, border-color 300ms ease;
+}
+
+.glass-no-highlight::before {
+  display: none;
+}
+
+/* Superfície que NÃO clipa filhos (para popovers ancorados dentro) */
+.glass-no-clip {
+  overflow: visible;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================
+   TIPOGRAFIA
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-sys-label);
+}
+
+p {
+  margin: 0;
+}
+
+/* ============================================================
+   ANIMAÇÕES
+   ============================================================ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
