@@ -26,7 +26,7 @@ export function App() {
           <Route path="/exposed" element={<ExposedPage />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   )
