@@ -26,6 +26,7 @@ jobs:
           VITE_GRAPH_CLIENT_ID: ${{ secrets.VITE_GRAPH_CLIENT_ID }}
           VITE_GRAPH_TENANT_ID: ${{ secrets.VITE_GRAPH_TENANT_ID }}
           VITE_MSAL_AUTHORITY: https://login.microsoftonline.com/common
+          VITE_REDIRECT_URI: https://black-tree-044c3e410.7.azurestaticapps.net/login
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1

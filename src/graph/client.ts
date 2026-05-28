@@ -21,7 +21,7 @@ const msalConfig: Configuration = {
   auth: {
     clientId: CLIENT_ID,
     authority: import.meta.env.VITE_MSAL_AUTHORITY || `https://login.microsoftonline.com/common`,
-    redirectUri: window.location.origin,
+    redirectUri: import.meta.env.VITE_REDIRECT_URI ?? window.location.origin,
     postLogoutRedirectUri: window.location.origin,
   },
   cache: {
