@@ -1,18 +1,1492 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" type="image/svg+xml" href="/logo.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0A84FF">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DriveTools</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DriveTools Microsoft Edition</title>
+  <meta name="description" content="Remova duplicatas, organize arquivos e audite permissoes do seu OneDrive. Microsoft 365 sob controle." />
+  <meta name="theme-color" content="#07000F" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- Aplica tema antes do paint para evitar flash -->
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    /* ===== TOKENS ===== */
+    :root {
+      color-scheme: dark;
+
+      --bg: #07000F;
+      --text: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.9);
+      --text-body: rgba(255, 255, 255, 0.65);
+      --text-muted: rgba(255, 255, 255, 0.5);
+
+      --accent: #0A84FF;
+      --green: #30D158;
+      --orange: #FF9F0A;
+      --purple: #BF5AF2;
+      --teal: #64D2FF;
+      --pink: #FF375F;
+
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-blur: blur(40px) saturate(180%) brightness(1.1);
+      --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glass-highlight: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+
+      --surface-1: rgba(255, 255, 255, 0.06);
+      --surface-2: rgba(255, 255, 255, 0.08);
+      --surface-3: rgba(255, 255, 255, 0.12);
+      --divider: rgba(255, 255, 255, 0.08);
+      --navbar-bg: rgba(7, 0, 15, 0.55);
+      --mockup-track: rgba(255, 255, 255, 0.08);
+
+      --ease: cubic-bezier(0.32, 0.72, 0, 1);
+      --duration: 350ms;
+
+      --max-width: 1200px;
+    }
+
+    /* Tema claro: aplicado automaticamente via prefers-color-scheme */
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        color-scheme: light;
+        --bg: #F2F2F7;
+        --text: #1C1C1E;
+        --text-secondary: rgba(28, 28, 30, 0.85);
+        --text-body: #3C3C43;
+        --text-muted: rgba(60, 60, 67, 0.6);
+
+        --glass-bg: rgba(255, 255, 255, 0.55);
+        --glass-border: rgba(0, 0, 0, 0.08);
+        --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 32px rgba(0, 0, 0, 0.08);
+        --glass-highlight: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+
+        --surface-1: rgba(0, 0, 0, 0.04);
+        --surface-2: rgba(0, 0, 0, 0.06);
+        --surface-3: rgba(0, 0, 0, 0.10);
+        --divider: rgba(0, 0, 0, 0.08);
+        --navbar-bg: rgba(242, 242, 247, 0.8);
+        --mockup-track: rgba(0, 0, 0, 0.08);
+      }
+    }
+
+    /* Tema claro: forcado pelo toggle do usuario */
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #F2F2F7;
+      --text: #1C1C1E;
+      --text-secondary: rgba(28, 28, 30, 0.85);
+      --text-body: #3C3C43;
+      --text-muted: rgba(60, 60, 67, 0.6);
+
+      --glass-bg: rgba(255, 255, 255, 0.55);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 32px rgba(0, 0, 0, 0.08);
+      --glass-highlight: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+
+      --surface-1: rgba(0, 0, 0, 0.04);
+      --surface-2: rgba(0, 0, 0, 0.06);
+      --surface-3: rgba(0, 0, 0, 0.10);
+      --divider: rgba(0, 0, 0, 0.08);
+      --navbar-bg: rgba(242, 242, 247, 0.8);
+      --mockup-track: rgba(0, 0, 0, 0.08);
+    }
+
+    /* Blobs mais suaves no tema claro */
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) .blob-1 { opacity: 0.22; }
+      :root:not([data-theme="dark"]) .blob-2 { opacity: 0.20; }
+      :root:not([data-theme="dark"]) .blob-3 { opacity: 0.16; }
+      :root:not([data-theme="dark"]) .blob-4 { opacity: 0.14; }
+      :root:not([data-theme="dark"]) .blob-5 { opacity: 0.13; }
+    }
+    :root[data-theme="light"] .blob-1 { opacity: 0.22; }
+    :root[data-theme="light"] .blob-2 { opacity: 0.20; }
+    :root[data-theme="light"] .blob-3 { opacity: 0.16; }
+    :root[data-theme="light"] .blob-4 { opacity: 0.14; }
+    :root[data-theme="light"] .blob-5 { opacity: 0.13; }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      transition: background-color 300ms var(--ease), color 300ms var(--ease);
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; background: none; border: none; color: inherit; cursor: pointer; }
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; }
+
+    /* ===== TIPOGRAFIA ===== */
+    .h-display {
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: var(--text);
+    }
+    .h-section {
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--text);
+    }
+    .h-card {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .body-lg {
+      font-size: 18px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+    .body-md {
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+    .label-caps {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    /* ===== MESH BACKGROUND ===== */
+    .mesh {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      will-change: transform;
+    }
+    .blob-1 {
+      width: 600px; height: 600px;
+      background: #0A84FF;
+      opacity: 0.30;
+      filter: blur(120px);
+      top: -150px; left: -150px;
+      animation: float-1 14s var(--ease) infinite alternate;
+    }
+    .blob-2 {
+      width: 500px; height: 500px;
+      background: #BF5AF2;
+      opacity: 0.25;
+      filter: blur(100px);
+      top: -100px; right: -150px;
+      animation: float-2 12s var(--ease) infinite alternate;
+    }
+    .blob-3 {
+      width: 400px; height: 400px;
+      background: #64D2FF;
+      opacity: 0.20;
+      filter: blur(90px);
+      top: 40%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: float-3 16s var(--ease) infinite alternate;
+    }
+    .blob-4 {
+      width: 350px; height: 350px;
+      background: #FF375F;
+      opacity: 0.18;
+      filter: blur(80px);
+      bottom: -100px; right: -100px;
+      animation: float-4 11s var(--ease) infinite alternate;
+    }
+    .blob-5 {
+      width: 300px; height: 300px;
+      background: #30D158;
+      opacity: 0.15;
+      filter: blur(70px);
+      bottom: -50px; left: -50px;
+      animation: float-5 10s var(--ease) infinite alternate;
+    }
+    @keyframes float-1 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(40px, 30px); }
+    }
+    @keyframes float-2 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-30px, 40px); }
+    }
+    @keyframes float-3 {
+      0%   { transform: translate(-50%, -50%) translate(0, 0); }
+      100% { transform: translate(-50%, -50%) translate(30px, -30px); }
+    }
+    @keyframes float-4 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-40px, -20px); }
+    }
+    @keyframes float-5 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(30px, -30px); }
+    }
+
+    /* ===== GLASS SURFACES ===== */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+      position: relative;
+    }
+    .glass::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 16px; right: 16px;
+      height: 1px;
+      background: var(--glass-highlight);
+      pointer-events: none;
+      border-radius: inherit;
+    }
+    .glass { transition: background-color 300ms var(--ease), border-color 300ms var(--ease), box-shadow 300ms var(--ease); }
+
+    /* ===== BOTOES ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: transform 250ms var(--ease), filter 250ms var(--ease), box-shadow 250ms var(--ease);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      white-space: nowrap;
+      user-select: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.8), rgba(10, 132, 255, 0.5));
+      border: 1px solid rgba(10, 132, 255, 0.6);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 20px rgba(10, 132, 255, 0.35);
+      color: #FFFFFF;
+    }
+    .btn-primary:hover {
+      transform: scale(1.03);
+      filter: brightness(1.1);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 28px rgba(10, 132, 255, 0.5);
+    }
+    .btn-secondary {
+      background: var(--surface-2);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      box-shadow: inset 0 1px 0 var(--glass-highlight-line, rgba(255, 255, 255, 0.25));
+    }
+    .btn-secondary:hover {
+      transform: scale(1.03);
+      background: var(--surface-3);
+      filter: brightness(1.1);
+    }
+
+    /* ===== BADGE ===== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--surface-1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+    .badge .label-caps { color: var(--text-secondary); }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--navbar-bg);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid var(--divider);
+      transition: background-color 300ms var(--ease), border-color 300ms var(--ease);
+    }
+    .navbar-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      gap: 24px;
+    }
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+    }
+    .navbar-brand img { width: 32px; height: 32px; }
+    .navbar-links {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+    .navbar-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-body);
+      transition: color 200ms var(--ease);
+    }
+    .navbar-links a:hover { color: var(--text); }
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lang-switch {
+      display: flex;
+      gap: 2px;
+      padding: 4px;
+      border-radius: 999px;
+      background: var(--surface-1);
+      border: 1px solid var(--glass-border);
+    }
+    .lang-btn {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-muted);
+      transition: all 200ms var(--ease);
+    }
+    .lang-btn.active {
+      background: var(--surface-3);
+      color: var(--text);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+    .theme-toggle {
+      width: 36px; height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--surface-1);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 200ms var(--ease), filter 200ms var(--ease), transform 200ms var(--ease);
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover {
+      background: var(--surface-2);
+      filter: brightness(1.15);
+      transform: scale(1.06);
+    }
+    .theme-toggle svg { display: block; }
+    .theme-toggle .icon-moon { display: none; }
+    :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+    :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) .theme-toggle .icon-sun { display: none; }
+      :root:not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
+    }
+    .navbar-cta {
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    .hamburger {
+      display: none;
+      width: 40px; height: 40px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: var(--surface-1);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+    }
+    .mobile-drawer {
+      display: none;
+      position: fixed;
+      top: 70px; left: 16px; right: 16px;
+      z-index: 99;
+      padding: 24px;
+      flex-direction: column;
+      gap: 20px;
+      transform: translateY(-20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms var(--ease), transform 300ms var(--ease);
+    }
+    .mobile-drawer.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .mobile-drawer a {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-body);
+      padding: 10px 0;
+    }
+    .mobile-drawer .btn { width: 100%; }
+
+    /* ===== LAYOUT BASE ===== */
+    main { position: relative; z-index: 1; }
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    section {
+      padding: 120px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .section-head {
+      max-width: 720px;
+      margin: 0 auto 64px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 140px;
+      padding-bottom: 80px;
+    }
+    .hero-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 24px;
+      width: 100%;
+    }
+    .hero-logo {
+      width: 96px; height: 96px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 12px 32px rgba(10, 132, 255, 0.4));
+    }
+    .hero-subhead {
+      max-width: 640px;
+      font-size: 18px;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-mockup {
+      margin-top: 64px;
+      width: 100%;
+      max-width: 960px;
+      padding: 32px;
+      border-radius: 24px;
+    }
+    .mockup-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--divider);
+      margin-bottom: 24px;
+    }
+    .mockup-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .mockup-dot.red { background: #FF5F57; }
+    .mockup-dot.yellow { background: #FEBC2E; }
+    .mockup-dot.green { background: #28C840; }
+    .mockup-url {
+      margin-left: 16px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      background: var(--surface-1);
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+    }
+    .mockup-content {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+    }
+    .mockup-donut-card {
+      padding: 24px;
+      border-radius: 16px;
+      background: var(--surface-1);
+      border: 1px solid var(--divider);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .mockup-donut {
+      width: 160px; height: 160px;
+      position: relative;
+    }
+    .mockup-donut-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .mockup-donut-label .pct {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .mockup-donut-label .cap {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+    .mockup-stat {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .mockup-stat .k { color: var(--text-muted); }
+    .mockup-stat .v { color: var(--text); font-weight: 600; }
+    .mockup-modules {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .mockup-module {
+      padding: 20px;
+      border-radius: 16px;
+      background: var(--surface-1);
+      border: 1px solid var(--divider);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mockup-module-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mockup-module-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .mockup-module-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ===== FEATURES ===== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 32px;
+      transition: transform 300ms var(--ease), box-shadow 300ms var(--ease);
+    }
+    .feature-card:hover {
+      transform: scale(1.02);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 16px 48px rgba(0, 0, 0, 0.25);
+    }
+    .feature-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .feature-icon.blue { background: rgba(10, 132, 255, 0.15); color: #0A84FF; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 24px rgba(10, 132, 255, 0.2); }
+    .feature-icon.green { background: rgba(48, 209, 88, 0.15); color: #30D158; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 24px rgba(48, 209, 88, 0.2); }
+    .feature-icon.orange { background: rgba(255, 159, 10, 0.15); color: #FF9F0A; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 24px rgba(255, 159, 10, 0.2); }
+    .feature-icon.purple { background: rgba(191, 90, 242, 0.15); color: #BF5AF2; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 24px rgba(191, 90, 242, 0.2); }
+    .feature-card h3 { margin-bottom: 12px; }
+
+    /* ===== HOW IT WORKS ===== */
+    .steps {
+      position: relative;
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .steps::before {
+      content: "";
+      position: absolute;
+      left: 49px;
+      top: 60px;
+      bottom: 60px;
+      width: 2px;
+      background: linear-gradient(180deg, rgba(10, 132, 255, 0.4), rgba(191, 90, 242, 0.4), rgba(48, 209, 88, 0.4));
+      border-radius: 2px;
+      opacity: 0.5;
+      z-index: 0;
+    }
+    .step {
+      position: relative;
+      padding: 32px;
+      padding-left: 104px;
+      padding-right: 120px;
+      min-height: 120px;
+      overflow: hidden;
+    }
+    .step-num {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 96px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      opacity: 0.12;
+      line-height: 1;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .step-icon {
+      position: absolute;
+      left: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: rgba(10, 132, 255, 0.15);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 16px rgba(10, 132, 255, 0.2);
+      z-index: 1;
+    }
+    .step h3, .step p { position: relative; z-index: 1; }
+    .step h3 { margin-bottom: 6px; }
+
+    /* ===== FAQ ===== */
+    .faq-list {
+      max-width: 780px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .faq-item {
+      padding: 0;
+      overflow: hidden;
+    }
+    .faq-trigger {
+      width: 100%;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      text-align: left;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 200ms var(--ease);
+    }
+    .faq-trigger:hover { background: var(--surface-1); }
+    .faq-chevron {
+      flex-shrink: 0;
+      transition: transform 300ms var(--ease);
+      color: var(--text-muted);
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 400ms var(--ease);
+    }
+    .faq-content-inner {
+      padding: 0 28px 24px;
+      color: var(--text-body);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ===== ABOUT ===== */
+    .about-card {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+    }
+    .about-photo {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--glass-border);
+      object-fit: cover;
+      object-position: center top;
+      background: linear-gradient(135deg, #0A84FF, #BF5AF2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+    }
+    .about-name {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .about-bio {
+      color: var(--text-body);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    .about-link {
+      margin-top: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 60px 0 40px;
+      border-top: 1px solid var(--divider);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .footer-brand img { width: 24px; height: 24px; }
+    .footer-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      font-size: 13px;
+    }
+    .footer-links a {
+      color: var(--text-body);
+      transition: color 200ms var(--ease);
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copyright {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* ===== REVEAL ANIMATION ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 600ms var(--ease), transform 600ms var(--ease);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== RESPONSIVO ===== */
+    @media (max-width: 1024px) {
+      section { padding: 80px 0; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .navbar-links, .navbar-actions > .lang-switch, .navbar-actions > .theme-toggle, .navbar-actions .navbar-cta { display: none; }
+      .hamburger { display: flex; }
+      .mobile-drawer { display: flex; }
+      .features-grid { grid-template-columns: 1fr; }
+      .mockup-content { grid-template-columns: 1fr; }
+      .mockup-modules { grid-template-columns: 1fr 1fr; }
+      .hero-mockup { padding: 20px; }
+      .step { padding-left: 84px; padding-right: 72px; }
+      .step-num { font-size: 64px; right: 16px; }
+      .step-icon { left: 20px; width: 40px; height: 40px; }
+      .steps::before { left: 39px; }
+      section { padding: 64px 0; }
+      .hero { padding-top: 120px; padding-bottom: 60px; }
+      .hero-mockup { margin-top: 40px; }
+      .navbar-inner { padding: 12px 16px; }
+      .container { padding: 0 16px; }
+    }
+    @media (max-width: 480px) {
+      .mockup-modules { grid-template-columns: 1fr; }
+      .hero-ctas { width: 100%; flex-direction: column; }
+      .hero-ctas .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mesh background animado -->
+  <div class="mesh" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+  </div>
+
+  <!-- Navbar fixa -->
+  <nav class="navbar" aria-label="Principal">
+    <div class="navbar-inner">
+      <a href="#hero" class="navbar-brand" aria-label="DriveTools">
+        <img src="/logo.svg" alt="DriveTools" />
+        <span>DriveTools</span>
+      </a>
+
+      <ul class="navbar-links">
+        <li><a href="#features" data-pt="Funcionalidades" data-en="Features" data-es="Funcionalidades">Funcionalidades</a></li>
+        <li><a href="#how" data-pt="Como funciona" data-en="How it works" data-es="Cómo funciona">Como funciona</a></li>
+        <li><a href="#faq" data-pt="FAQ" data-en="FAQ" data-es="FAQ">FAQ</a></li>
+      </ul>
+
+      <div class="navbar-actions">
+        <div class="lang-switch" role="group" aria-label="Idioma">
+          <button class="lang-btn" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="es">ES</button>
+        </div>
+        <button class="theme-toggle" aria-label="Alternar tema">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <a href="https://black-tree-044c3e410.7.azurestaticapps.net" class="btn btn-primary navbar-cta" data-pt="Acessar app" data-en="Open app" data-es="Abrir app">Acessar app</a>
+        <button class="hamburger" aria-label="Menu" id="hamburger">
+          <i data-lucide="menu" style="width:20px;height:20px"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Drawer mobile -->
+  <div class="mobile-drawer glass" id="mobileDrawer">
+    <a href="#features" data-pt="Funcionalidades" data-en="Features" data-es="Funcionalidades">Funcionalidades</a>
+    <a href="#how" data-pt="Como funciona" data-en="How it works" data-es="Cómo funciona">Como funciona</a>
+    <a href="#faq" data-pt="FAQ" data-en="FAQ" data-es="FAQ">FAQ</a>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="pt">PT</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="es">ES</button>
+      </div>
+      <button class="theme-toggle" aria-label="Alternar tema">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+    <a href="https://black-tree-044c3e410.7.azurestaticapps.net" class="btn btn-primary" data-pt="Acessar app" data-en="Open app" data-es="Abrir app">Acessar app</a>
+  </div>
+
+  <main>
+
+    <!-- SECAO 1 HERO -->
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="hero-inner">
+          <img src="/logo.svg" alt="DriveTools" class="hero-logo reveal" />
+
+          <div class="badge reveal">
+            <span class="badge-dot"></span>
+            <span class="label-caps" data-pt="Microsoft 365 · OneDrive" data-en="Microsoft 365 · OneDrive" data-es="Microsoft 365 · OneDrive">Microsoft 365 · OneDrive</span>
+          </div>
+
+          <h1 class="h-display reveal"
+              data-pt="Seu OneDrive, finalmente sob controle."
+              data-en="Your OneDrive, finally under control."
+              data-es="Tu OneDrive, finalmente bajo control.">
+            Seu OneDrive, finalmente sob controle.
+          </h1>
+
+          <p class="hero-subhead reveal"
+             data-pt="Remova duplicatas, organize arquivos e audite permissões públicas. Tudo em um lugar, com a elegância que o Microsoft 365 merece."
+             data-en="Remove duplicates, organize files and audit public permissions. All in one place, with the elegance Microsoft 365 deserves."
+             data-es="Elimina duplicados, organiza archivos y audita permisos públicos. Todo en un lugar, con la elegancia que Microsoft 365 merece.">
+            Remova duplicatas, organize arquivos e audite permissões públicas. Tudo em um lugar, com a elegância que o Microsoft 365 merece.
+          </p>
+
+          <div class="hero-ctas reveal">
+            <a href="https://black-tree-044c3e410.7.azurestaticapps.net" class="btn btn-primary"
+               data-pt="Começar agora" data-en="Get started" data-es="Empezar ahora">Começar agora</a>
+            <a href="#features" class="btn btn-secondary"
+               data-pt="Ver funcionalidades" data-en="See features" data-es="Ver funcionalidades">Ver funcionalidades</a>
+          </div>
+
+          <!-- Mockup simulado do app -->
+          <div class="hero-mockup glass reveal" aria-hidden="true">
+            <div class="mockup-bar">
+              <span class="mockup-dot red"></span>
+              <span class="mockup-dot yellow"></span>
+              <span class="mockup-dot green"></span>
+              <span class="mockup-url">drivetools.app</span>
+            </div>
+            <div class="mockup-content">
+              <div class="mockup-donut-card">
+                <div class="mockup-donut">
+                  <svg viewBox="0 0 100 100" width="160" height="160">
+                    <circle cx="50" cy="50" r="42" fill="none" style="stroke: var(--mockup-track);" stroke-width="10"/>
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="url(#donutGradient)" stroke-width="10"
+                            stroke-dasharray="263.89" stroke-dashoffset="65.97" stroke-linecap="round"
+                            transform="rotate(-90 50 50)"/>
+                    <defs>
+                      <linearGradient id="donutGradient" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#0A84FF"/>
+                        <stop offset="100%" stop-color="#64D2FF"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div class="mockup-donut-label">
+                    <span class="pct">75%</span>
+                    <span class="cap" data-pt="USADO" data-en="USED" data-es="USADO">USADO</span>
+                  </div>
+                </div>
+                <div style="width:100%; display:flex; flex-direction:column; gap:8px;">
+                  <div class="mockup-stat"><span class="k" data-pt="Total" data-en="Total" data-es="Total">Total</span><span class="v">1 TB</span></div>
+                  <div class="mockup-stat"><span class="k" data-pt="Em uso" data-en="In use" data-es="En uso">Em uso</span><span class="v">768 GB</span></div>
+                  <div class="mockup-stat"><span class="k" data-pt="Livre" data-en="Free" data-es="Libre">Livre</span><span class="v">256 GB</span></div>
+                </div>
+              </div>
+              <div class="mockup-modules">
+                <div class="mockup-module">
+                  <div class="mockup-module-icon" style="background:rgba(10,132,255,0.15); color:#0A84FF;">
+                    <i data-lucide="trash-2" style="width:20px;height:20px"></i>
+                  </div>
+                  <div class="mockup-module-title">Drive Clean</div>
+                  <div class="mockup-module-meta" data-pt="142 duplicatas encontradas" data-en="142 duplicates found" data-es="142 duplicados encontrados">142 duplicatas encontradas</div>
+                </div>
+                <div class="mockup-module">
+                  <div class="mockup-module-icon" style="background:rgba(48,209,88,0.15); color:#30D158;">
+                    <i data-lucide="folder-open" style="width:20px;height:20px"></i>
+                  </div>
+                  <div class="mockup-module-title">Drive Organizer</div>
+                  <div class="mockup-module-meta" data-pt="38 arquivos para organizar" data-en="38 files to organize" data-es="38 archivos para organizar">38 arquivos para organizar</div>
+                </div>
+                <div class="mockup-module">
+                  <div class="mockup-module-icon" style="background:rgba(255,159,10,0.15); color:#FF9F0A;">
+                    <i data-lucide="shield-alert" style="width:20px;height:20px"></i>
+                  </div>
+                  <div class="mockup-module-title">Drive Exposed</div>
+                  <div class="mockup-module-meta" data-pt="7 links públicos ativos" data-en="7 public links active" data-es="7 enlaces públicos activos">7 links públicos ativos</div>
+                </div>
+                <div class="mockup-module">
+                  <div class="mockup-module-icon" style="background:rgba(191,90,242,0.15); color:#BF5AF2;">
+                    <i data-lucide="layout-dashboard" style="width:20px;height:20px"></i>
+                  </div>
+                  <div class="mockup-module-title">Dashboard</div>
+                  <div class="mockup-module-meta" data-pt="3 recomendações" data-en="3 recommendations" data-es="3 recomendaciones">3 recomendações</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECAO 2 FUNCIONALIDADES -->
+    <section id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="label-caps" data-pt="Funcionalidades" data-en="Features" data-es="Funcionalidades">Funcionalidades</span>
+          <h2 class="h-section"
+              data-pt="Quatro módulos para dominar o seu OneDrive."
+              data-en="Four modules to master your OneDrive."
+              data-es="Cuatro módulos para dominar tu OneDrive.">
+            Quatro módulos para dominar o seu OneDrive.
+          </h2>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card glass reveal">
+            <div class="feature-icon blue"><i data-lucide="trash-2" style="width:28px;height:28px"></i></div>
+            <h3 class="h-card" data-pt="Drive Clean" data-en="Drive Clean" data-es="Drive Clean">Drive Clean</h3>
+            <p class="body-md"
+               data-pt="Detecta e remove arquivos duplicados usando hash criptográfico. Zero falsos positivos."
+               data-en="Detects and removes duplicate files using cryptographic hash. Zero false positives."
+               data-es="Detecta y elimina archivos duplicados usando hash criptográfico. Cero falsos positivos.">
+              Detecta e remove arquivos duplicados usando hash criptográfico. Zero falsos positivos.
+            </p>
+          </article>
+
+          <article class="feature-card glass reveal">
+            <div class="feature-icon green"><i data-lucide="folder-open" style="width:28px;height:28px"></i></div>
+            <h3 class="h-card" data-pt="Drive Organizer" data-en="Drive Organizer" data-es="Drive Organizer">Drive Organizer</h3>
+            <p class="body-md"
+               data-pt="Categoriza automaticamente arquivos soltos na raiz por tipo: documentos, imagens, vídeos e mais."
+               data-en="Automatically categorizes loose files in your root by type: documents, images, videos and more."
+               data-es="Categoriza automáticamente archivos sueltos en la raíz por tipo: documentos, imágenes, videos y más.">
+              Categoriza automaticamente arquivos soltos na raiz por tipo: documentos, imagens, vídeos e mais.
+            </p>
+          </article>
+
+          <article class="feature-card glass reveal">
+            <div class="feature-icon orange"><i data-lucide="shield-alert" style="width:28px;height:28px"></i></div>
+            <h3 class="h-card" data-pt="Drive Exposed" data-en="Drive Exposed" data-es="Drive Exposed">Drive Exposed</h3>
+            <p class="body-md"
+               data-pt="Audita permissões públicas e links de compartilhamento. Saiba exatamente quem acessa o quê."
+               data-en="Audits public permissions and sharing links. Know exactly who accesses what."
+               data-es="Audita permisos públicos y enlaces de uso compartido. Sabe exactamente quién accede a qué.">
+              Audita permissões públicas e links de compartilhamento. Saiba exatamente quem acessa o quê.
+            </p>
+          </article>
+
+          <article class="feature-card glass reveal">
+            <div class="feature-icon purple"><i data-lucide="layout-dashboard" style="width:28px;height:28px"></i></div>
+            <h3 class="h-card" data-pt="Dashboard" data-en="Dashboard" data-es="Dashboard">Dashboard</h3>
+            <p class="body-md"
+               data-pt="Visão completa do uso do seu OneDrive: armazenamento, arquivos pesados, inativos e recomendações."
+               data-en="Full view of your OneDrive usage: storage, heavy files, inactive files and recommendations."
+               data-es="Vista completa del uso de tu OneDrive: almacenamiento, archivos pesados, inactivos y recomendaciones.">
+              Visão completa do uso do seu OneDrive: armazenamento, arquivos pesados, inativos e recomendações.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECAO 3 COMO FUNCIONA -->
+    <section id="how">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="label-caps" data-pt="Como funciona" data-en="How it works" data-es="Cómo funciona">Como funciona</span>
+          <h2 class="h-section"
+              data-pt="Três passos para tomar controle."
+              data-en="Three steps to take control."
+              data-es="Tres pasos para tomar el control.">
+            Três passos para tomar controle.
+          </h2>
+        </div>
+
+        <div class="steps">
+          <article class="step glass reveal">
+            <span class="step-num">01</span>
+            <span class="step-icon"><i data-lucide="log-in" style="width:18px;height:18px"></i></span>
+            <h3 class="h-card"
+                data-pt="Conecte sua conta Microsoft"
+                data-en="Connect your Microsoft account"
+                data-es="Conecta tu cuenta Microsoft">
+              Conecte sua conta Microsoft
+            </h3>
+            <p class="body-md"
+               data-pt="Autenticação segura via Microsoft Identity Platform. Sem armazenar credenciais."
+               data-en="Secure authentication via Microsoft Identity Platform. No credentials stored."
+               data-es="Autenticación segura vía Microsoft Identity Platform. Sin almacenar credenciales.">
+              Autenticação segura via Microsoft Identity Platform. Sem armazenar credenciais.
+            </p>
+          </article>
+
+          <article class="step glass reveal">
+            <span class="step-num">02</span>
+            <span class="step-icon" style="background:rgba(191,90,242,0.15); color:#BF5AF2; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 0 16px rgba(191,90,242,0.2);"><i data-lucide="layers" style="width:18px;height:18px"></i></span>
+            <h3 class="h-card"
+                data-pt="Escolha o módulo"
+                data-en="Choose the module"
+                data-es="Elige el módulo">
+              Escolha o módulo
+            </h3>
+            <p class="body-md"
+               data-pt="Selecione Drive Clean, Organizer ou Exposed conforme sua necessidade."
+               data-en="Pick Drive Clean, Organizer or Exposed according to your need."
+               data-es="Selecciona Drive Clean, Organizer o Exposed según tu necesidad.">
+              Selecione Drive Clean, Organizer ou Exposed conforme sua necessidade.
+            </p>
+          </article>
+
+          <article class="step glass reveal">
+            <span class="step-num">03</span>
+            <span class="step-icon" style="background:rgba(48,209,88,0.15); color:#30D158; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 0 16px rgba(48,209,88,0.2);"><i data-lucide="zap" style="width:18px;height:18px"></i></span>
+            <h3 class="h-card"
+                data-pt="Tome ação"
+                data-en="Take action"
+                data-es="Toma acción">
+              Tome ação
+            </h3>
+            <p class="body-md"
+               data-pt="Visualize resultados e execute limpeza, organização ou revogação de permissões com um clique."
+               data-en="View results and run cleanup, organization or permission revocation with a single click."
+               data-es="Visualiza resultados y ejecuta limpieza, organización o revocación de permisos con un clic.">
+              Visualize resultados e execute limpeza, organização ou revogação de permissões com um clique.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECAO 4 FAQ -->
+    <section id="faq">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="label-caps" data-pt="FAQ" data-en="FAQ" data-es="FAQ">FAQ</span>
+          <h2 class="h-section"
+              data-pt="Perguntas frequentes."
+              data-en="Frequently asked questions."
+              data-es="Preguntas frecuentes.">
+            Perguntas frequentes.
+          </h2>
+        </div>
+
+        <div class="faq-list">
+          <article class="faq-item glass reveal">
+            <button class="faq-trigger" type="button">
+              <span data-pt="Meus arquivos ficam armazenados no DriveTools?"
+                    data-en="Does DriveTools store my files?"
+                    data-es="¿DriveTools almacena mis archivos?">Meus arquivos ficam armazenados no DriveTools?</span>
+              <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+            </button>
+            <div class="faq-content">
+              <div class="faq-content-inner"
+                   data-pt="Não. Todos os dados ficam no seu OneDrive. O DriveTools acessa apenas via Microsoft Graph API com as permissões que você concede."
+                   data-en="No. All data stays in your OneDrive. DriveTools accesses it only via Microsoft Graph API with the permissions you grant."
+                   data-es="No. Todos los datos permanecen en tu OneDrive. DriveTools accede solo vía Microsoft Graph API con los permisos que concedes.">
+                Não. Todos os dados ficam no seu OneDrive. O DriveTools acessa apenas via Microsoft Graph API com as permissões que você concede.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item glass reveal">
+            <button class="faq-trigger" type="button">
+              <span data-pt="Preciso instalar alguma coisa?"
+                    data-en="Do I need to install anything?"
+                    data-es="¿Necesito instalar algo?">Preciso instalar alguma coisa?</span>
+              <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+            </button>
+            <div class="faq-content">
+              <div class="faq-content-inner"
+                   data-pt="Não. DriveTools roda completamente no navegador. Basta acessar e autenticar com sua conta Microsoft."
+                   data-en="No. DriveTools runs entirely in the browser. Just visit and authenticate with your Microsoft account."
+                   data-es="No. DriveTools se ejecuta completamente en el navegador. Solo accede y autentícate con tu cuenta Microsoft.">
+                Não. DriveTools roda completamente no navegador. Basta acessar e autenticar com sua conta Microsoft.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item glass reveal">
+            <button class="faq-trigger" type="button">
+              <span data-pt="Funciona com OneDrive pessoal e corporativo?"
+                    data-en="Does it work with personal and business OneDrive?"
+                    data-es="¿Funciona con OneDrive personal y empresarial?">Funciona com OneDrive pessoal e corporativo?</span>
+              <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+            </button>
+            <div class="faq-content">
+              <div class="faq-content-inner"
+                   data-pt="Sim. Compatível com contas Microsoft pessoais (Hotmail, Outlook) e contas Microsoft 365 corporativas."
+                   data-en="Yes. Compatible with personal Microsoft accounts (Hotmail, Outlook) and Microsoft 365 business accounts."
+                   data-es="Sí. Compatible con cuentas Microsoft personales (Hotmail, Outlook) y cuentas Microsoft 365 corporativas.">
+                Sim. Compatível com contas Microsoft pessoais (Hotmail, Outlook) e contas Microsoft 365 corporativas.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item glass reveal">
+            <button class="faq-trigger" type="button">
+              <span data-pt="O DriveTools é gratuito?"
+                    data-en="Is DriveTools free?"
+                    data-es="¿DriveTools es gratuito?">O DriveTools é gratuito?</span>
+              <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+            </button>
+            <div class="faq-content">
+              <div class="faq-content-inner"
+                   data-pt="Sim, atualmente gratuito. Crie sua conta Microsoft e acesse agora."
+                   data-en="Yes, currently free. Create your Microsoft account and access it now."
+                   data-es="Sí, actualmente gratuito. Crea tu cuenta Microsoft y accede ahora.">
+                Sim, atualmente gratuito. Crie sua conta Microsoft e acesse agora.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item glass reveal">
+            <button class="faq-trigger" type="button">
+              <span data-pt="Minhas permissões são seguras?"
+                    data-en="Are my permissions safe?"
+                    data-es="¿Mis permisos son seguros?">Minhas permissões são seguras?</span>
+              <i data-lucide="chevron-down" class="faq-chevron" style="width:20px;height:20px"></i>
+            </button>
+            <div class="faq-content">
+              <div class="faq-content-inner"
+                   data-pt="O DriveTools usa OAuth 2.0 via Microsoft Identity Platform. Você pode revogar o acesso a qualquer momento pelo portal Microsoft."
+                   data-en="DriveTools uses OAuth 2.0 via Microsoft Identity Platform. You can revoke access anytime through the Microsoft portal."
+                   data-es="DriveTools usa OAuth 2.0 vía Microsoft Identity Platform. Puedes revocar el acceso en cualquier momento desde el portal Microsoft.">
+                O DriveTools usa OAuth 2.0 via Microsoft Identity Platform. Você pode revogar o acesso a qualquer momento pelo portal Microsoft.
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECAO 5 SOBRE -->
+    <section id="about">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="label-caps" data-pt="Sobre o criador" data-en="About the creator" data-es="Sobre el creador">Sobre o criador</span>
+        </div>
+
+        <article class="about-card glass reveal">
+          <img src="/rodrigo-prado.jpg" alt="Rodrigo Prado" class="about-photo" id="aboutPhoto"
+               onerror="this.outerHTML='<div class=\'about-photo\'>RP</div>'" />
+          <h3 class="about-name">Rodrigo Prado</h3>
+          <p class="about-bio"
+             data-pt="Especialista em tecnologia e automação, apaixonado por criar ferramentas que simplificam o trabalho de pessoas que dependem de tecnologia no dia a dia."
+             data-en="Technology and automation specialist, passionate about building tools that simplify the work of people who rely on technology every day."
+             data-es="Especialista en tecnología y automatización, apasionado por crear herramientas que simplifiquen el trabajo de personas que dependen de la tecnología en su día a día.">
+            Especialista em tecnologia e automação, apaixonado por criar ferramentas que simplificam o trabalho de pessoas que dependem de tecnologia no dia a dia.
+          </p>
+          <a href="https://www.linkedin.com/in/rodrigoprado128/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary about-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            <span>LinkedIn</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPE -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="/logo.svg" alt="" />
+        <span data-pt="DriveTools Microsoft Edition" data-en="DriveTools Microsoft Edition" data-es="DriveTools Microsoft Edition">DriveTools Microsoft Edition</span>
+      </div>
+      <div class="footer-meta"
+           data-pt="Desenvolvido com Microsoft Graph API e MSAL.js"
+           data-en="Built with Microsoft Graph API and MSAL.js"
+           data-es="Desarrollado con Microsoft Graph API y MSAL.js">
+        Desenvolvido com Microsoft Graph API e MSAL.js
+      </div>
+      <div class="footer-links">
+        <a href="https://black-tree-044c3e410.7.azurestaticapps.net" data-pt="Acessar App" data-en="Open App" data-es="Abrir App">Acessar App</a>
+      </div>
+      <div class="footer-copyright"
+           data-pt="© 2026 Rodrigo Prado. Não afiliado à Microsoft Corporation."
+           data-en="© 2026 Rodrigo Prado. Not affiliated with Microsoft Corporation."
+           data-es="© 2026 Rodrigo Prado. No afiliado a Microsoft Corporation.">
+        © 2026 Rodrigo Prado. Não afiliado à Microsoft Corporation.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ============================================================
+       i18n: troca textos sem reload via data-pt/data-en/data-es
+    ============================================================ */
+    const SUPPORTED = ['pt', 'en', 'es'];
+
+    function detectLang() {
+      const stored = localStorage.getItem('lang');
+      if (stored && SUPPORTED.includes(stored)) return stored;
+      const nav = (navigator.language || 'pt').toLowerCase();
+      if (nav.startsWith('en')) return 'en';
+      if (nav.startsWith('es')) return 'es';
+      return 'pt';
+    }
+
+    function setLanguage(lang) {
+      if (!SUPPORTED.includes(lang)) lang = 'pt';
+      document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : lang);
+      document.querySelectorAll('[data-pt]').forEach(el => {
+        const val = el.dataset[lang];
+        if (val != null) el.textContent = val;
+      });
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      localStorage.setItem('lang', lang);
+    }
+
+    /* ============================================================
+       Hamburger mobile
+    ============================================================ */
+    function initHamburger() {
+      const btn = document.getElementById('hamburger');
+      const drawer = document.getElementById('mobileDrawer');
+      if (!btn || !drawer) return;
+      btn.addEventListener('click', () => {
+        drawer.classList.toggle('open');
+      });
+      drawer.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => drawer.classList.remove('open'));
+      });
+    }
+
+    /* ============================================================
+       FAQ accordion: max-height transition
+    ============================================================ */
+    function initFaq() {
+      document.querySelectorAll('.faq-item').forEach(item => {
+        const trigger = item.querySelector('.faq-trigger');
+        const content = item.querySelector('.faq-content');
+        if (!trigger || !content) return;
+        trigger.addEventListener('click', () => {
+          const open = item.classList.toggle('open');
+          if (open) {
+            content.style.maxHeight = content.scrollHeight + 'px';
+          } else {
+            content.style.maxHeight = '0px';
+          }
+        });
+      });
+    }
+
+    /* ============================================================
+       Scroll reveal: opacity + translateY com IntersectionObserver
+    ============================================================ */
+    function initReveal() {
+      const els = document.querySelectorAll('.reveal');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(el => io.observe(el));
+    }
+
+    /* ============================================================
+       Lang buttons binding (todos os botoes, navbar + drawer)
+    ============================================================ */
+    function bindLangButtons() {
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+      });
+    }
+
+    /* ============================================================
+       Theme toggle (claro/escuro), persistencia em localStorage
+    ============================================================ */
+    function getEffectiveTheme() {
+      const explicit = document.documentElement.getAttribute('data-theme');
+      if (explicit === 'light' || explicit === 'dark') return explicit;
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    function applyTheme(theme) {
+      if (theme !== 'light' && theme !== 'dark') return;
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('theme', theme); } catch (e) {}
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', theme === 'light' ? '#F2F2F7' : '#07000F');
+    }
+    function bindThemeToggle() {
+      document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const next = getEffectiveTheme() === 'light' ? 'dark' : 'light';
+          applyTheme(next);
+        });
+      });
+    }
+
+    /* ============================================================
+       Boot
+    ============================================================ */
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+      setLanguage(detectLang());
+      bindLangButtons();
+      bindThemeToggle();
+      initHamburger();
+      initFaq();
+      initReveal();
+    });
+  </script>
+
+</body>
 </html>
